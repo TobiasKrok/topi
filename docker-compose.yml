@@ -1,15 +1,58 @@
+version: "3"
+
 services:
-  psql_bp:
+  topi_db:
     image: postgres:latest
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${BLUEPRINT_DB_DATABASE}
-      POSTGRES_USER: ${BLUEPRINT_DB_USERNAME}
-      POSTGRES_PASSWORD: ${BLUEPRINT_DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "${BLUEPRINT_DB_PORT}:5432"
+      - "${DB_PORT}:5432"
     volumes:
-      - psql_volume_bp:/var/lib/postgresql/data
+      - topi_db:/var/lib/postgresql/data
+
+  gitea:
+    image: docker.gitea.com/gitea:1.24.3
+    container_name: gitea
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - GITEA__database__DB_TYPE=postgres
+      - GITEA__database__HOST=db:5432
+      - GITEA__database__NAME=gitea
+      - GITEA__database__USER=gitea
+      - GITEA__database__PASSWD=gitea
+    restart: always
+    networks:
+      - gitea
+    volumes:
+      - gitea_data:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "3000:3000"
+      - "222:22"
+    depends_on:
+      - gitea_db
+
+  gitea_db:
+    image: docker.io/library/postgres:14
+    restart: always
+    environment:
+      - POSTGRES_USER=gitea
+      - POSTGRES_PASSWORD=gitea
+      - POSTGRES_DB=gitea
+    networks:
+      - gitea
+    volumes:
+      - gitea_db:/var/lib/postgresql/data
+
+networks:
+  gitea:
 
 volumes:
-  psql_volume_bp:
+  topi_db:
+  gitea_data:
+  gitea_db:

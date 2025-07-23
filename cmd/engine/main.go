@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
-
-	"topi/internal/server"
+	engine "topi/internal/engine/server"
+	"topi/internal/shared/database"
+	"topi/internal/shared/server"
 )
 
 func gracefulShutdown(apiServer *http.Server, done chan bool) {
@@ -39,17 +42,22 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 
 func main() {
 
-	server := server.NewServer()
+	port, _ := strconv.Atoi(os.Getenv("TOPI_ENGINE_PORT"))
 
+	fmt.Println("Starting server on port: ", port)
+	db := database.New()
+	e := engine.NewEngineServer(db)
+	s := server.NewServer(port, func(mux *http.ServeMux) {
+		e.RegisterRouters(mux)
+	})
 	// Create a done channel to signal when the shutdown is complete
 	done := make(chan bool, 1)
 
 	// Run graceful shutdown in a separate goroutine
-	go gracefulShutdown(server, done)
-
-	err := server.ListenAndServe()
+	go gracefulShutdown(s, done)
+	err := s.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
-		panic(fmt.Sprintf("http server error: %s", err))
+		panic(fmt.Sprintf("http s error: %s", err))
 	}
 
 	// Wait for the graceful shutdown to complete

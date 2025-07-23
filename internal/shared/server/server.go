@@ -3,13 +3,10 @@ package server
 import (
 	"fmt"
 	"net/http"
-	"os"
-	"strconv"
 	"time"
+	"topi/internal/shared/database"
 
 	_ "github.com/joho/godotenv/autoload"
-
-	"topi/internal/database"
 )
 
 type Server struct {
@@ -17,19 +14,16 @@ type Server struct {
 
 	db database.Service
 }
+type createHandlers func(*http.ServeMux)
 
-func NewServer() *http.Server {
-	port, _ := strconv.Atoi(os.Getenv("PORT"))
-	NewServer := &Server{
-		port: port,
+func NewServer(port int, cb createHandlers) *http.Server {
 
-		db: database.New(),
-	}
-
+	mux := http.NewServeMux()
+	cb(mux) // adds custom handlers
 	// Declare Server config
 	server := &http.Server{
-		Addr:         fmt.Sprintf(":%d", NewServer.port),
-		Handler:      NewServer.RegisterRoutes(),
+		Addr:         fmt.Sprintf(":%d", port),
+		Handler:      CorsMiddleware(LoggingMiddleware(mux)),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,

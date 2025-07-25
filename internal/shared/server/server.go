@@ -20,10 +20,10 @@ func NewServer(port int, cb createHandlers) *http.Server {
 
 	mux := http.NewServeMux()
 	cb(mux) // adds custom handlers
-	// Declare Server config
+	// TODO ADD CORS
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", port),
-		Handler:      CorsMiddleware(LoggingMiddleware(mux)),
+		Handler:      LoggingMiddleware(mux),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,

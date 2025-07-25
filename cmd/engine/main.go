@@ -11,7 +11,6 @@ import (
 	"syscall"
 	"time"
 	engine "topi/internal/engine/server"
-	"topi/internal/shared/database"
 	"topi/internal/shared/server"
 )
 
@@ -45,8 +44,7 @@ func main() {
 	port, _ := strconv.Atoi(os.Getenv("TOPI_ENGINE_PORT"))
 
 	fmt.Println("Starting server on port: ", port)
-	db := database.New()
-	e := engine.NewEngineServer(db)
+	e := engine.NewEngineServer()
 	s := server.NewServer(port, func(mux *http.ServeMux) {
 		e.RegisterRouters(mux)
 	})

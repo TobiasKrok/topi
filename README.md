@@ -1,7 +1,8 @@
-# Project topi
+# topi - toby's pipelines
 
-One Paragraph of project description goes here
+My custom pipeline implementation for learning, WIP
 
+Gitea idea: webhook -> engine -> rabbitmq -> scheduler -> pod -> either websocket or a rabbitmq name that engine can conenc tto and stream data to client
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.

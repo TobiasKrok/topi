@@ -12,7 +12,22 @@ services:
       - "${DB_PORT}:5432"
     volumes:
       - topi_db:/var/lib/postgresql/data
-
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: rabbitmq
+    ports:
+      - "5672:5672" # AMQP protocol port
+      - "15672:15672" # Management UI port
+    environment:
+      RABBITMQ_DEFAULT_USER: topi
+      RABBITMQ_DEFAULT_PASS: topi
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
+      interval: 30s
+      timeout: 30s
+      retries: 3
   gitea:
     image: docker.gitea.com/gitea:1.24.3
     container_name: gitea
@@ -20,10 +35,11 @@ services:
       - USER_UID=1000
       - USER_GID=1000
       - GITEA__database__DB_TYPE=postgres
-      - GITEA__database__HOST=db:5432
+      - GITEA__database__HOST=gitea_db:5432
       - GITEA__database__NAME=gitea
       - GITEA__database__USER=gitea
       - GITEA__database__PASSWD=gitea
+      - GITEA__webhook__ALLOWED_HOST_LIST=localhost,host.docker.internal
     restart: always
     networks:
       - gitea
@@ -32,7 +48,7 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     ports:
-      - "3000:3000"
+      - "5000:3000"
       - "222:22"
     depends_on:
       - gitea_db
@@ -48,7 +64,6 @@ services:
       - gitea
     volumes:
       - gitea_db:/var/lib/postgresql/data
-
 networks:
   gitea:
 
@@ -56,3 +71,4 @@ volumes:
   topi_db:
   gitea_data:
   gitea_db:
+  rabbitmq_data:

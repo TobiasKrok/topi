@@ -35,17 +35,31 @@ func (g *GiteaService) GetFile(owner, name, ref, filepath string) ([]byte, error
 
 }
 
-func (g *GiteaService) GetTree(owner string, name string) (GitTree, error) {
+func (g *GiteaService) GetTree(owner string, name string, ref string, recursive bool) (GitTree, error) {
 
-	tree, res, err := g.client.GetTrees(owner, name, gitea.ListTreeOptions{Recursive: true})
+	t, res, err := g.client.GetTrees(owner, name, gitea.ListTreeOptions{Recursive: recursive, Ref: ref})
 	if err != nil {
 		return GitTree{}, err
 	}
 	if res.StatusCode != 200 {
 		return GitTree{}, fmt.Errorf("unexpected status code: %d", res.StatusCode)
 	}
-	fmt.Printf("Tree: %v\n", tree)
-	return GitTree{}, nil
+	var tree GitTree
+	var treeEntries []TreeEntry
+
+	tree.Path = t.URL
+	tree.TotalCount = t.TotalCount
+	tree.Entries = treeEntries
+	for _, entry := range t.Entries {
+		treeEntries = append(treeEntries, TreeEntry{
+			Path: entry.Path,
+			Type: entry.Type,
+			Mode: entry.Mode,
+			Size: entry.Size,
+			Sha:  entry.SHA,
+		})
+	}
+	return tree, nil
 }
 
 //func (g *giteaService) GetRepo(owner string, name string) error {

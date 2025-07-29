@@ -15,6 +15,7 @@ type EngineServer struct {
 }
 
 func NewEngineServer() *EngineServer {
+	// git setup
 	gitInstance := os.Getenv("TOPI_GIT_INSTANCE")
 	var gitService git.GitService
 	switch gitInstance {
@@ -22,9 +23,26 @@ func NewEngineServer() *EngineServer {
 		gitService = git.NewGiteaService()
 
 	}
+
+	// rabbitmq setup
+	rmq := rabbitmq.New()
+	err := rmq.Channel.ExchangeDeclare("topi", "topic", true, false, false, false, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	q, err := rmq.Channel.QueueDeclare("engine.trigger", true, false, false, false, nil)
+	if err != nil {
+		panic(err)
+	}
+	err = rmq.Channel.QueueBind(q.Name, "engine.trigger", "topi", false, nil)
+	if err != nil {
+		panic(err)
+	}
+
 	return &EngineServer{
 		db:       database.New(),
-		rabbitmq: rabbitmq.New(),
+		rabbitmq: rmq,
 		git:      gitService,
 	}
 }

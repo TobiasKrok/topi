@@ -1,55 +1,166 @@
-# topi - toby's pipelines
+# Topi
 
-My custom pipeline implementation for learning, WIP
+A Kubernetes-native CI/CD automation system built as a learning project for Golang and Kubernetes API.
 
-Gitea idea: webhook -> engine -> rabbitmq -> scheduler -> pod -> either websocket or a rabbitmq name that engine can conenc tto and stream data to client
-RabbitMQ streams!
+## Description
+
+Topi is an Azure Pipelines-like CI/CD system consisting of three components:
+- **Engine**: HTTP server that listens to Git webhooks
+- **Scheduler**: Kubernetes operator that manages build jobs
+- **Builder**: Application that builds projects based on workflows
+
+## Multi-Module Architecture
+
+This project uses Go workspaces with separate modules for each component:
+```
+topi/
+├── engine/     # Webhook server
+├── scheduler/  # Kubernetes operator
+├── builder/    # Build executor
+└── shared/     # Common code
+```
+
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+### Prerequisites
+- go version v1.24.0+
+- docker version 17.03+
+- kubectl version v1.11.3+
+- Access to a Kubernetes v1.11.3+ cluster
 
-## MakeFile
+### Local Development
 
-Run build make command with tests
-```bash
-make all
+**Start the development environment:**
+```sh
+make dev-env-up  # Starts PostgreSQL, RabbitMQ, and Gitea
 ```
 
-Build the application
-```bash
-make build
+**Run services locally:**
+```sh
+make run-engine     # Run engine on port 8080
+make run-scheduler  # Run scheduler (requires cluster access)
+make run-builder    # Run builder
 ```
 
-Run the application
-```bash
-make run
-```
-Create DB container
-```bash
-make docker-run
+### Building
+
+**Build all components:**
+```sh
+make build-all
 ```
 
-Shutdown DB Container
-```bash
-make docker-down
+**Build Docker images:**
+```sh
+make docker-build-all
 ```
 
-DB Integrations Test:
-```bash
-make itest
+### Kubernetes Deployment
+
+**Install CRDs:**
+```sh
+make install-crds
 ```
 
-Live reload the application:
-```bash
-make watch
+**Deploy scheduler:**
+```sh
+make deploy-scheduler
 ```
 
-Run the test suite:
-```bash
-make test
+> **NOTE**: If you encounter RBAC errors, you may need to grant yourself cluster-admin
+privileges or be logged in as admin.
+
+**Create instances of your solution**
+You can apply the samples (examples) from the config/sample:
+
+```sh
+kubectl apply -k config/samples/
 ```
 
-Clean up binary from the last build:
-```bash
-make clean
+>**NOTE**: Ensure that the samples has default values to test it out.
+
+### To Uninstall
+**Delete the instances (CRs) from the cluster:**
+
+```sh
+kubectl delete -k config/samples/
 ```
+
+**Delete the APIs(CRDs) from the cluster:**
+
+```sh
+make uninstall
+```
+
+**UnDeploy the controller from the cluster:**
+
+```sh
+make undeploy
+```
+
+## Project Distribution
+
+Following the options to release and provide this solution to the users.
+
+### By providing a bundle with all YAML files
+
+1. Build the installer for the image built and published in the registry:
+
+```sh
+make build-installer IMG=<some-registry>/topi:tag
+```
+
+**NOTE:** The makefile target mentioned above generates an 'install.yaml'
+file in the dist directory. This file contains all the resources built
+with Kustomize, which are necessary to install this project without its
+dependencies.
+
+2. Using the installer
+
+Users can just run 'kubectl apply -f <URL for YAML BUNDLE>' to install
+the project, i.e.:
+
+```sh
+kubectl apply -f https://raw.githubusercontent.com/<org>/topi/<tag or branch>/dist/install.yaml
+```
+
+### By providing a Helm Chart
+
+1. Build the chart using the optional helm plugin
+
+```sh
+kubebuilder edit --plugins=helm/v1-alpha
+```
+
+2. See that a chart was generated under 'dist/chart', and users
+can obtain this solution from there.
+
+**NOTE:** If you change the project, you need to update the Helm Chart
+using the same command above to sync the latest changes. Furthermore,
+if you create webhooks, you need to use the above command with
+the '--force' flag and manually ensure that any custom configuration
+previously added to 'dist/chart/values.yaml' or 'dist/chart/manager/manager.yaml'
+is manually re-applied afterwards.
+
+## Contributing
+// TODO(user): Add detailed information on how you would like others to contribute to this project
+
+**NOTE:** Run `make help` for more information on all potential `make` targets
+
+More information can be found via the [Kubebuilder Documentation](https://book.kubebuilder.io/introduction.html)
+
+## License
+
+Copyright 2025.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+

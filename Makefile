@@ -1,80 +1,160 @@
-# Makefile for topi project
+# Topi Multi-Module Project Root Makefile
+# This is the orchestrator Makefile that delegates to individual module Makefiles
 
-# Build configuration
-BUILD_DIR = out
-MAIN_APP = main
-BINARIES = engine
+# Setting SHELL to bash allows bash commands to be executed by recipes.
+SHELL = /usr/bin/env bash -o pipefail
+.SHELLFLAGS = -ec
 
-.PHONY: all build run clean test watch docker-run docker-down itest help
+# CONTAINER_TOOL defines the container tool to be used for building images.
+CONTAINER_TOOL ?= docker
 
-# Default target
-all: test build
+# Define modules
+MODULES := shared engine scheduler builder
 
-# Build all binaries
-build:
-	@if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
-	@for %%b in ($(BINARIES)) do @(echo Building %%b... && go build -o $(BUILD_DIR)\%%b.exe .\cmd\%%b)
+##@ General
 
-# Run a specific binary
-run: build
-	@if "$(filter-out $@,$(MAKECMDGOALS))" == "" ( \
-		$(BUILD_DIR)\$(MAIN_APP).exe \
-	) else ( \
-		$(BUILD_DIR)\$(filter-out $@,$(MAKECMDGOALS)).exe \
-	)
+.PHONY: help
+help: ## Display this help.
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
-# Allow any target as an argument to 'run'
-%:
-	@:
+##@ Development
 
-# Clean up binary from last build
-clean:
-	@if exist $(BUILD_DIR) rmdir /s /q $(BUILD_DIR)
+.PHONY: fmt-all
+fmt-all: ## Run go fmt against all modules.
+	@for module in $(MODULES); do \
+		echo "Formatting $$module..."; \
+		$(MAKE) -C $$module fmt; \
+	done
 
-# Run tests
-test:
-	@go test ./... -v
+.PHONY: vet-all
+vet-all: ## Run go vet against all modules.
+	@for module in $(MODULES); do \
+		echo "Vetting $$module..."; \
+		$(MAKE) -C $$module vet; \
+	done
 
-# Run integration tests
-itest:
-	@go test ./... -tags=integration -v
+.PHONY: test-all
+test-all: ## Run tests for all modules.
+	@for module in $(MODULES); do \
+		echo "Testing $$module..."; \
+		$(MAKE) -C $$module test; \
+	done
 
-# Live reload the application (requires air)
-watch:
-	@air
+.PHONY: lint-all
+lint-all: ## Run golangci-lint for all modules.
+	@for module in $(MODULES); do \
+		if [ "$$module" != "shared" ]; then \
+			echo "Linting $$module..."; \
+			$(MAKE) -C $$module lint; \
+		fi; \
+	done
 
-# Create DB container
-docker-run:
-	@docker-compose up -d
+.PHONY: mod-download-all
+mod-download-all: ## Download go modules for all modules.
+	@for module in $(MODULES); do \
+		echo "Downloading modules for $$module..."; \
+		$(MAKE) -C $$module mod-download; \
+	done
 
-# Shutdown DB container
-docker-down:
-	@docker-compose down
+.PHONY: mod-tidy-all
+mod-tidy-all: ## Tidy go modules for all modules.
+	@for module in $(MODULES); do \
+		echo "Tidying modules for $$module..."; \
+		$(MAKE) -C $$module mod-tidy; \
+	done
 
-# Install dependencies
-install:
-	@go mod tidy
-	@go mod download
+##@ Build
 
-# List available binaries
-list-binaries:
-	@echo Available binaries:
-	@echo - engine (main application)
-	@dir /b .\cmd 2>nul
+.PHONY: build-all
+build-all: ## Build all module binaries.
+	@echo "Building engine..."
+	$(MAKE) -C engine build
+	@echo "Building scheduler..."
+	$(MAKE) -C scheduler build
+	@echo "Building builder..."
+	$(MAKE) -C builder build
 
-# Help information
-help:
-	@echo Makefile commands:
-	@echo   make all         - Run tests and build application
-	@echo   make build       - Build the application
-	@echo   make run         - Run the main application
-	@echo   make run <name>  - Run a specific binary (e.g., make run engine)
-	@echo   make clean       - Clean up binaries
-	@echo   make test        - Run tests
-	@echo   make itest       - Run integration tests
-	@echo   make watch       - Live reload with air
-	@echo   make docker-run  - Create DB container
-	@echo   make docker-down - Shutdown DB container
-	@echo   make install     - Install dependencies
-	@echo   make list-binaries - List available binaries
-	@echo   make help        - Show this help message
+.PHONY: docker-build-all
+docker-build-all: ## Build Docker images for all modules.
+	@echo "Building engine Docker image..."
+	$(MAKE) -C engine docker-build
+	@echo "Building scheduler Docker image..."
+	$(MAKE) -C scheduler docker-build
+	@echo "Building builder Docker image..."
+	$(MAKE) -C builder docker-build
+
+.PHONY: docker-push-all
+docker-push-all: ## Push Docker images for all modules.
+	@echo "Pushing engine Docker image..."
+	$(MAKE) -C engine docker-push
+	@echo "Pushing scheduler Docker image..."
+	$(MAKE) -C scheduler docker-push
+	@echo "Pushing builder Docker image..."
+	$(MAKE) -C builder docker-push
+
+##@ Run
+
+.PHONY: run-engine
+run-engine: ## Run engine from your host.
+	$(MAKE) -C engine run
+
+.PHONY: run-scheduler
+run-scheduler: ## Run scheduler from your host.
+	$(MAKE) -C scheduler run
+
+.PHONY: run-builder
+run-builder: ## Run builder from your host.
+	$(MAKE) -C builder run
+
+##@ Environment
+
+.PHONY: dev-env-up
+dev-env-up: ## Start development environment (PostgreSQL, RabbitMQ, Gitea).
+	docker-compose up -d
+
+.PHONY: dev-env-down
+dev-env-down: ## Stop development environment.
+	docker-compose down
+
+.PHONY: dev-env-logs
+dev-env-logs: ## Show logs from development environment.
+	docker-compose logs -f
+
+##@ Kubernetes
+
+.PHONY: install-crds
+install-crds: ## Install CRDs into the K8s cluster.
+	$(MAKE) -C scheduler install
+
+.PHONY: uninstall-crds
+uninstall-crds: ## Uninstall CRDs from the K8s cluster.
+	$(MAKE) -C scheduler uninstall
+
+.PHONY: deploy-scheduler
+deploy-scheduler: ## Deploy scheduler to the K8s cluster.
+	$(MAKE) -C scheduler deploy
+
+.PHONY: undeploy-scheduler
+undeploy-scheduler: ## Undeploy scheduler from the K8s cluster.
+	$(MAKE) -C scheduler undeploy
+
+##@ Workspace
+
+.PHONY: workspace-sync
+workspace-sync: ## Sync go workspace.
+	go work sync
+
+.PHONY: clean
+clean: ## Clean build artifacts from all modules.
+	@for module in $(MODULES); do \
+		if [ -d "$$module/bin" ]; then \
+			echo "Cleaning $$module/bin..."; \
+			rm -rf $$module/bin; \
+		fi; \
+	done
+
+##@ Testing
+
+.PHONY: test-e2e
+test-e2e: ## Run end-to-end tests.
+	$(MAKE) -C scheduler test-e2e

@@ -2,14 +2,13 @@ package controller
 
 import (
 	"context"
+
 	v1 "github.com/tobiaskrok/topi/scheduler/api/v1"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
-
-	buildv1 "github.com/tobiaskrok/topi/api/v1"
 )
 
 // BuildJobReconciler reconciles a BuildJob object

@@ -37,8 +37,8 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	buildv1 "github.com/tobiaskrok/topi/api/v1"
-	"github.com/tobiaskrok/topi/internal/controller"
+	buildv1 "github.com/tobiaskrok/topi/scheduler/api/v1"
+	"github.com/tobiaskrok/topi/scheduler/internal/controller"
 	// +kubebuilder:scaffold:imports
 )
 

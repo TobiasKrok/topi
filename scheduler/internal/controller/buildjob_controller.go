@@ -33,6 +33,11 @@ type BuildJobReconciler struct {
 func (r *BuildJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = logf.FromContext(ctx)
 
+	var bj v1.BuildJob
+	if err := r.Get(ctx, req.NamespacedName, &bj); err != nil {
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+
 	// TODO(user): your logic here
 
 	return ctrl.Result{}, nil

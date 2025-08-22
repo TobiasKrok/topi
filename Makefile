@@ -92,6 +92,19 @@ docker-push-all: ## Push Docker images for all modules.
 	@echo "Pushing builder Docker image..."
 	$(MAKE) -C builder docker-push
 
+.PHONY: kind-push-all
+kind-push-all: ## Build and push all Docker images to local kind registry.
+	@echo "Building and pushing engine to kind registry..."
+	$(MAKE) -C engine kind-push
+	@echo "Building and pushing scheduler to kind registry..."
+	$(MAKE) -C scheduler kind-push
+	@echo "Building and pushing builder to kind registry..."
+	$(MAKE) -C builder kind-push
+
+.PHONY: kind-deploy-scheduler
+kind-deploy-scheduler: ## Deploy scheduler to kind cluster using local registry.
+	$(MAKE) -C scheduler kind-deploy
+
 ##@ Run
 
 .PHONY: run-engine

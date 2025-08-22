@@ -1,5 +1,8 @@
 # Image URL to use for building/pushing image
 IMG ?= topi-builder:latest
+# Local kind registry settings
+KIND_REGISTRY ?= localhost:5001
+KIND_IMG ?= $(KIND_REGISTRY)/topi-builder:latest
 
 # CONTAINER_TOOL defines the container tool to be used for building images.
 CONTAINER_TOOL ?= docker
@@ -60,3 +63,8 @@ docker-build: ## Build docker image.
 .PHONY: docker-push
 docker-push: ## Push docker image.
 	$(CONTAINER_TOOL) push ${IMG}
+
+.PHONY: kind-push
+kind-push: docker-build ## Build and push docker image to local kind registry.
+	$(CONTAINER_TOOL) tag ${IMG} ${KIND_IMG}
+	$(CONTAINER_TOOL) push ${KIND_IMG}

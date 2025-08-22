@@ -18,7 +18,7 @@ COPY api/ api/
 COPY internal/ internal/
 
 # Build
-RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -a -o scheduler cmd/scheduler/main.go
+RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -a -o scheduler cmd/main.go
 
 # Use distroless as minimal base image to package the scheduler binary
 FROM gcr.io/distroless/static:nonroot

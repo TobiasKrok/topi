@@ -11,7 +11,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	buildv1 "github.com/tobiaskrok/topi/api/v1"
+	buildv1 "github.com/tobiaskrok/topi/scheduler/api/v1"
 )
 
 var _ = Describe("BuildJob Controller", func() {

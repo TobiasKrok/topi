@@ -14,15 +14,20 @@ type BuildJobSpec struct {
 	// The following markers will use OpenAPI v3 schema to validate the value
 	// More info: https://book.kubebuilder.io/reference/markers/crd-validation.html
 
-	// foo is an example field of BuildJob. Edit buildjob_types.go to remove/update
-	// +optional
-	Foo *string `json:"foo,omitempty"`
+	Repository   *string `json:"repository"`
+	Ref          *string `json:"ref"`
+	Owner        *string `json:"owner"`
+	ArtefactName *string `json:"artefactName"`
 }
 
 // BuildJobStatus defines the observed state of BuildJob.
 type BuildJobStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	Status        *string          `json:"artefactName"`
+	BuildStart    *metav1.Time     `json:"buildStart"`
+	BuildEnd      *metav1.Time     `json:"buildEnd"`
+	BuildDuratioh *metav1.Duration `json:"duration"`
 }
 
 // +kubebuilder:object:root=true

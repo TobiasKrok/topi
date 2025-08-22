@@ -1,11 +1,32 @@
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  labels:
-    app.kubernetes.io/name: topi
-    app.kubernetes.io/managed-by: kustomize
   name: manager-role
 rules:
-- apiGroups: [""]
-  resources: ["pods"]
-  verbs: ["get", "list", "watch"]
+- apiGroups:
+  - build.topi.tobias.no
+  resources:
+  - buildjobs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - build.topi.tobias.no
+  resources:
+  - buildjobs/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - build.topi.tobias.no
+  resources:
+  - buildjobs/status
+  verbs:
+  - get
+  - patch
+  - update

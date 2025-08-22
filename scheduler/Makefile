@@ -1,5 +1,8 @@
 # Image URL to use for building/pushing image
 IMG ?= topi-scheduler:latest
+# Local kind registry settings
+KIND_REGISTRY ?= localhost:5001
+KIND_IMG ?= $(KIND_REGISTRY)/topi-scheduler:latest
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -62,11 +65,11 @@ mod-tidy: ## Tidy go modules.
 
 .PHONY: build
 build: manifests generate fmt vet ## Build scheduler binary.
-	go build -o bin/scheduler cmd/scheduler/main.go
+	go build -o bin/scheduler cmd/main.go
 
 .PHONY: run
 run: manifests generate fmt vet ## Run scheduler from your host.
-	go run ./cmd/scheduler/main.go
+	go run ./cmd/main.go
 
 .PHONY: docker-build
 docker-build: ## Build docker image.
@@ -75,6 +78,16 @@ docker-build: ## Build docker image.
 .PHONY: docker-push
 docker-push: ## Push docker image.
 	$(CONTAINER_TOOL) push ${IMG}
+
+.PHONY: kind-push
+kind-push: docker-build ## Build and push docker image to local kind registry.
+	$(CONTAINER_TOOL) tag ${IMG} ${KIND_IMG}
+	$(CONTAINER_TOOL) push ${KIND_IMG}
+
+.PHONY: kind-deploy
+kind-deploy: manifests kustomize kind-push ## Deploy to kind cluster using local registry image.
+	cd config/manager && $(KUSTOMIZE) edit set image controller=${KIND_IMG}
+	$(KUSTOMIZE) build config/default | $(KUBECTL) apply -f -
 
 ##@ Deployment
 

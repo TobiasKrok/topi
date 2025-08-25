@@ -18,6 +18,8 @@ type BuildJobSpec struct {
 	Ref          *string `json:"ref"`
 	Owner        *string `json:"owner"`
 	ArtefactName *string `json:"artefactName"`
+	// +optional
+	Suspend *bool `jsos:"suspend"`
 }
 
 // BuildJobStatus defines the observed state of BuildJob.

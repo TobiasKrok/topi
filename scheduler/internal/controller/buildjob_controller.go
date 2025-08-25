@@ -11,6 +11,14 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
+/*
+Topi Scheduelr
+
+The scehduler is responsible for controlling BuildJobs, scheduling them, list actice builds, cancel them
+
+
+*/
+
 // BuildJobReconciler reconciles a BuildJob object
 type BuildJobReconciler struct {
 	client.Client

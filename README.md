@@ -4,7 +4,8 @@ A Kubernetes-native CI/CD automation system built as a learning project for Gola
 
 ## Description
 
-Topi is an Azure Pipelines-like CI/CD system consisting of three components:
+Topi is an Azure Pipelines-like CI/CD sysSem consisting of three components:
+
 - **Engine**: HTTP server that listens to Git webhooks
 - **Scheduler**: Kubernetes operator that manages build jobs
 - **Builder**: Application that builds projects based on workflows
@@ -12,6 +13,7 @@ Topi is an Azure Pipelines-like CI/CD system consisting of three components:
 ## Multi-Module Architecture
 
 This project uses Go workspaces with separate modules for each component:
+
 ```
 topi/
 ├── engine/     # Webhook server
@@ -23,6 +25,7 @@ topi/
 ## Getting Started
 
 ### Prerequisites
+
 - go version v1.24.0+
 - docker version 17.03+
 - kubectl version v1.11.3+
@@ -31,11 +34,13 @@ topi/
 ### Local Development
 
 **Start the development environment:**
+
 ```sh
 make dev-env-up  # Starts PostgreSQL, RabbitMQ, and Gitea
 ```
 
 **Run services locally:**
+
 ```sh
 make run-engine     # Run engine on port 8080
 make run-scheduler  # Run scheduler (requires cluster access)
@@ -45,11 +50,13 @@ make run-builder    # Run builder
 ### Building
 
 **Build all components:**
+
 ```sh
 make build-all
 ```
 
 **Build Docker images:**
+
 ```sh
 make docker-build-all
 ```
@@ -57,17 +64,19 @@ make docker-build-all
 ### Kubernetes Deployment
 
 **Install CRDs:**
+
 ```sh
 make install-crds
 ```
 
 **Deploy scheduler:**
+
 ```sh
 make deploy-scheduler
 ```
 
 > **NOTE**: If you encounter RBAC errors, you may need to grant yourself cluster-admin
-privileges or be logged in as admin.
+> privileges or be logged in as admin.
 
 **Create instances of your solution**
 You can apply the samples (examples) from the config/sample:
@@ -76,9 +85,10 @@ You can apply the samples (examples) from the config/sample:
 kubectl apply -k config/samples/
 ```
 
->**NOTE**: Ensure that the samples has default values to test it out.
+> **NOTE**: Ensure that the samples has default values to test it out.
 
 ### To Uninstall
+
 **Delete the instances (CRs) from the cluster:**
 
 ```sh
@@ -132,7 +142,7 @@ kubebuilder edit --plugins=helm/v1-alpha
 ```
 
 2. See that a chart was generated under 'dist/chart', and users
-can obtain this solution from there.
+   can obtain this solution from there.
 
 **NOTE:** If you change the project, you need to update the Helm Chart
 using the same command above to sync the latest changes. Furthermore,
@@ -142,6 +152,7 @@ previously added to 'dist/chart/values.yaml' or 'dist/chart/manager/manager.yaml
 is manually re-applied afterwards.
 
 ## Contributing
+
 // TODO(user): Add detailed information on how you would like others to contribute to this project
 
 **NOTE:** Run `make help` for more information on all potential `make` targets
@@ -163,4 +174,3 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-

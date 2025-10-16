@@ -1,0 +1,83 @@
+version: "1.0"
+name: "Node.js Installation Test"
+
+env:
+  NODE_VERSION: "20"
+  BUILD_ENV: "development"
+
+jobs:
+  install-and-test:
+    steps:
+      - name: "System Info"
+        description: "Display system information"
+        run: |
+          echo "=== System Information ==="
+          uname -a
+          echo "=== Current User ==="
+          whoami
+          echo "=== Workspace ==="
+          pwd
+          ls -la
+
+      - name: "Install Node.js"
+        description: "Install Node.js and npm"
+        run: |
+          echo "Installing Node.js version ${NODE_VERSION}..."
+          curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash -
+          apt-get install -y nodejs
+          echo "Node.js installation complete!"
+
+      - name: "Verify Installation"
+        description: "Check Node.js and npm versions"
+        run: |
+          echo "=== Verifying Installation ==="
+          node --version
+          npm --version
+          echo "=== NPM Config ==="
+          npm config list
+
+      - name: "Create Sample Project"
+        description: "Initialize a sample Node.js project"
+        run: |
+          cd /opt/topi-dev
+          echo "Creating sample project..."
+          mkdir -p sample-app
+          cd sample-app
+
+          # Create package.json
+          cat > package.json << 'EOF'
+          {
+            "name": "sample-app",
+            "version": "1.0.0",
+            "description": "Test Node.js project",
+            "main": "index.js",
+            "scripts": {
+              "start": "node index.js",
+              "test": "echo 'Tests passed!'"
+            }
+          }
+          EOF
+
+          # Create index.js
+          cat > index.js << 'EOF'
+          console.log('Hello from Topi Builder!');
+          console.log('Node version:', process.version);
+          console.log('Build ID:', process.env.TOPI_BUILDID);
+          EOF
+
+          # Run the app
+          npm start
+          npm test
+
+      - name: "Install Dependencies"
+        description: "Test npm package installation"
+        run: |
+          cd /opt/topi-dev/sample-app
+          npm install express axios
+          echo "=== Installed Packages ==="
+          npm list
+
+      - name: "Complete"
+        uses: "echo"
+        params:
+          message: "Node.js workflow completed successfully! Workspace: ${TOPI_WORKSPACE}"

@@ -1,0 +1,85 @@
+version: "1.0"
+name: "Simple Test Workflow"
+
+env:
+  TEST_VAR: "Hello from test"
+  DEBUG: "true"
+
+jobs:
+  basic-test:
+    steps:
+      - name: "Echo Test"
+        uses: "echo"
+        params:
+          message: "Starting simple test workflow"
+
+      - name: "Environment Check"
+        description: "Display environment variables"
+        run: |
+          echo "=== Topi Environment Variables ==="
+          echo "Workspace: $TOPI_WORKSPACE"
+          echo "Build ID: $TOPI_BUILDID"
+          echo "Test Variable: $TEST_VAR"
+          echo "Debug Mode: $DEBUG"
+
+      - name: "File Operations"
+        description: "Create and manipulate files"
+        run: |
+          cd /opt/topi-dev
+          echo "Creating test files..."
+          
+          # Create a test file
+          echo "This is a test file from Topi Builder" > test.txt
+          echo "Build ID: $TOPI_BUILDID" >> test.txt
+          
+          # Create a directory structure
+          mkdir -p output/logs
+          mkdir -p output/artifacts
+          
+          # Generate some output
+          echo "Log entry 1" > output/logs/build.log
+          echo "Log entry 2" >> output/logs/build.log
+          
+          # List created files
+          echo "=== Created Files ==="
+          ls -la
+          ls -la output/
+          
+          # Read the test file
+          echo "=== Test File Contents ==="
+          cat test.txt
+
+      - name: "Set Custom Variables"
+        description: "Test environment variable persistence"
+        run: |
+          echo "Setting custom variables..."
+          echo "CUSTOM_VAR=TestValue123" >> $TOPI_ENV
+          echo "BUILD_STATUS=InProgress" >> $TOPI_ENV
+          echo "Variables set!"
+
+      - name: "Read Custom Variables"
+        description: "Verify variable persistence"
+        run: |
+          echo "Reading custom variables..."
+          echo "CUSTOM_VAR: $CUSTOM_VAR"
+          echo "BUILD_STATUS: $BUILD_STATUS"
+
+      - name: "System Commands"
+        description: "Run various system commands"
+        run: |
+          echo "=== System Information ==="
+          date
+          uptime
+          df -h /opt/topi-dev
+          
+          echo "=== Process Information ==="
+          ps aux | head -5
+          
+          echo "=== Network Information ==="
+          hostname
+          hostname -I 2>/dev/null || hostname -i
+
+      - name: "Complete"
+        uses: "echo"
+        params:
+          message: "Simple test completed successfully!"

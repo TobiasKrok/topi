@@ -73,7 +73,7 @@ run: manifests generate fmt vet ## Run scheduler from your host.
 
 .PHONY: docker-build
 docker-build: ## Build docker image.
-	$(CONTAINER_TOOL) build -t ${IMG} .
+	$(CONTAINER_TOOL) build -t ${IMG} -f Dockerfile ..
 
 .PHONY: docker-push
 docker-push: ## Push docker image.

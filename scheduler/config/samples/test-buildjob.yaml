@@ -1,0 +1,13 @@
+apiVersion: build.topi.tobias.no/v1
+kind: BuildJob
+metadata:
+  name: test-buildjob
+  namespace: topi-builds
+  annotations:
+    builder.topi.io/commit-sha: "test-workflow-abc123"
+spec:
+  repository: "https://github.com/example/test-repo"
+  ref: "main"
+  owner: "test-owner"
+  artefactName: "test-artifact"
+  suspend: false

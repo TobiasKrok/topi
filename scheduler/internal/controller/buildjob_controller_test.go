@@ -19,7 +19,6 @@ var _ = Describe("BuildJob Controller", func() {
 		const resourceName = "test-resource"
 
 		ctx := context.Background()
-
 		typeNamespacedName := types.NamespacedName{
 			Name:      resourceName,
 			Namespace: "default", // TODO(user):Modify as needed

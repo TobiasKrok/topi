@@ -58,7 +58,7 @@ run: fmt vet ## Run builder from your host.
 
 .PHONY: docker-build
 docker-build: ## Build docker image.
-	$(CONTAINER_TOOL) build -t ${IMG} .
+	$(CONTAINER_TOOL) build -t ${IMG} -f Dockerfile ..
 
 .PHONY: docker-push
 docker-push: ## Push docker image.
@@ -68,3 +68,37 @@ docker-push: ## Push docker image.
 kind-push: docker-build ## Build and push docker image to local kind registry.
 	$(CONTAINER_TOOL) tag ${IMG} ${KIND_IMG}
 	$(CONTAINER_TOOL) push ${KIND_IMG}
+
+##@ Testing
+
+.PHONY: docker-test
+docker-test: ## Run workflow in isolated Docker container (WORKFLOW=path/to/workflow.yaml)
+	@./test-runner.sh $(WORKFLOW)
+
+.PHONY: docker-test-build
+docker-test-build: ## Build the test Docker image
+	docker-compose -f docker-compose.test.yml build
+
+.PHONY: docker-test-up
+docker-test-up: ## Start test container in background
+	docker-compose -f docker-compose.test.yml up -d builder-test
+
+.PHONY: docker-test-down
+docker-test-down: ## Stop and remove test containers
+	docker-compose -f docker-compose.test.yml down
+
+.PHONY: docker-test-logs
+docker-test-logs: ## Show logs from test container
+	docker-compose -f docker-compose.test.yml logs -f builder-test
+
+.PHONY: docker-test-shell
+docker-test-shell: ## Open shell in test container
+	docker-compose -f docker-compose.test.yml exec builder-test bash
+
+.PHONY: docker-test-clean
+docker-test-clean: ## Remove test containers and volumes
+	docker-compose -f docker-compose.test.yml down -v
+
+.PHONY: docker-test-workspace
+docker-test-workspace: ## Show test workspace contents
+	docker-compose -f docker-compose.test.yml exec builder-test ls -la /opt/topi-dev/

@@ -5,17 +5,23 @@ ARG TARGETARCH
 
 WORKDIR /workspace
 
+# Copy shared module first (it's a dependency)
+COPY shared/ shared/
+
 # Copy the Go Modules manifests
-COPY go.mod go.mod
-COPY go.sum* go.sum
+COPY scheduler/go.mod scheduler/go.mod
+COPY scheduler/go.sum scheduler/go.sum
+
+WORKDIR /workspace/scheduler
 
 # Download dependencies
 RUN go mod download
 
 # Copy the go source
-COPY cmd/ cmd/
-COPY api/ api/
-COPY internal/ internal/
+COPY scheduler/cmd/ cmd/
+COPY scheduler/api/ api/
+COPY scheduler/internal/ internal/
+COPY scheduler/config/ config/
 
 # Build
 RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -a -o scheduler cmd/main.go
@@ -23,7 +29,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -a -o sc
 # Use distroless as minimal base image to package the scheduler binary
 FROM gcr.io/distroless/static:nonroot
 WORKDIR /
-COPY --from=builder /workspace/scheduler .
+COPY --from=builder /workspace/scheduler/scheduler .
 USER 65532:65532
 
 ENTRYPOINT ["/scheduler"]

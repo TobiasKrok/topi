@@ -48,7 +48,7 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     ports:
-      - "5000:3000"
+      - "3300:3000"
       - "222:22"
     depends_on:
       - gitea_db

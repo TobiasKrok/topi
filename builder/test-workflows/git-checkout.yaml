@@ -1,0 +1,33 @@
+version: "1.0"
+name: "Git Checkout Test"
+
+env:
+  DEBUG: "true"
+
+jobs:
+  checkout-test:
+    steps:
+      - name: "Prepare Workspace"
+        run: |
+          echo "Preparing workspace..."
+          echo "Current directory: $(pwd)"
+          echo "Workspace: ${TOPI_WORKSPACE}"
+          rm -rf ${TOPI_WORKSPACE}/*
+          
+      - name: "Checkout Repository"
+        uses: "git/checkout"
+        
+      - name: "Verify Checkout"
+        run: |
+          echo "Checking if repository was cloned..."
+          ls -la ${TOPI_WORKSPACE}/
+          if [ -d "${TOPI_WORKSPACE}/.git" ]; then
+            echo "✅ Git repository successfully cloned!"
+            cd ${TOPI_WORKSPACE}
+            echo "Repository info:"
+            git remote -v
+            git log --oneline -5
+          else
+            echo "❌ Git checkout failed - no .git directory found"
+            exit 1
+          fi

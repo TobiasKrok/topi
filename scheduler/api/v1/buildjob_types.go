@@ -19,17 +19,64 @@ type BuildJobSpec struct {
 	Owner        *string `json:"owner"`
 	ArtefactName *string `json:"artefactName"`
 	// +optional
-	Suspend *bool `jsos:"suspend"`
+	Suspend *bool `json:"suspend"`
 }
+
+// BuildJobPhase represents the current phase of the build job
+// +kubebuilder:validation:Enum=Pending;Queued;Running;Succeeded;Failed;Cancelled
+type BuildJobPhase string
+
+const (
+	// BuildJobPhasePending means the build job has been created but not yet validated
+	BuildJobPhasePending BuildJobPhase = "Pending"
+	// BuildJobPhaseQueued means the build job is queued and waiting for resources
+	BuildJobPhaseQueued BuildJobPhase = "Queued"
+	// BuildJobPhaseRunning means the build job is actively running
+	BuildJobPhaseRunning BuildJobPhase = "Running"
+	// BuildJobPhaseSucceeded means the build job completed successfully
+	BuildJobPhaseSucceeded BuildJobPhase = "Succeeded"
+	// BuildJobPhaseFailed means the build job failed
+	BuildJobPhaseFailed BuildJobPhase = "Failed"
+	// BuildJobPhaseCancelled means the build job was cancelled
+	BuildJobPhaseCancelled BuildJobPhase = "Cancelled"
+)
 
 // BuildJobStatus defines the observed state of BuildJob.
 type BuildJobStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Status        *string          `json:"artefactName"`
-	BuildStart    *metav1.Time     `json:"buildStart"`
-	BuildEnd      *metav1.Time     `json:"buildEnd"`
-	BuildDuratioh *metav1.Duration `json:"duration"`
+
+	// Phase represents the current phase of the build job
+	// +optional
+	Phase BuildJobPhase `json:"phase,omitempty"`
+
+	// BuildStart is when the build started
+	// +optional
+	BuildStart *metav1.Time `json:"buildStart,omitempty"`
+
+	// BuildEnd is when the build ended
+	// +optional
+	BuildEnd *metav1.Time `json:"buildEnd,omitempty"`
+
+	// BuildDuration is how long the build took
+	// +optional
+	BuildDuration *metav1.Duration `json:"duration,omitempty"`
+
+	// BuildID is the unique identifier for this build
+	// +optional
+	BuildID *string `json:"buildid,omitempty"`
+
+	// The commit sha, used to find the required config map
+	// +optional
+	CommitSha string `json:"commitsha,omitempty"`
+
+	// RequiredProviders lists the providers needed by the workflow
+	// +optional
+	RequiredProviders []string `json:"requiredProviders,omitempty"`
+
+	// Message provides additional context about the current phase
+	// +optional
+	Message string `json:"message,omitempty"`
 }
 
 // +kubebuilder:object:root=true

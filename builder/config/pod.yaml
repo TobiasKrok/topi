@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-builder-$(date +%s)
+  namespace: topi-builds
+  labels:
+    app: topi-builder
+spec:
+  serviceAccountName: topi-builder
+  containers:
+    - name: builder
+      image: localhost:${REGISTRY_PORT}/topi-builder:latest
+      imagePullPolicy: Always
+      env:
+        - name: SOURCE_REPO
+          value: "https://github.com/example/test"
+        - name: SOURCE_WORKFLOW
+          value: "./test-workflow.yaml"
+        - name: BUILD_ID
+          value: "test-$(date +%s)"
+        - name: WORKSPACE
+          value: "/opt/topi-dev"
+        - name: MINIO_ENDPOINT
+          value: "minio.topi-system:9000"
+        - name: MINIO_ACCESS_KEY
+          value: "minioadmin"
+        - name: MINIO_SECRET_KEY
+          value: "minioadmin123"
+        - name: REGISTRY_ENDPOINT
+          value: "localhost:${REGISTRY_PORT}"
+      volumeMounts:
+        - name: workspace
+          mountPath: /opt/topi-dev
+        - name: cache
+          mountPath: /cache
+  volumes:
+    - name: workspace
+      emptyDir: {}
+    - name: cache
+      emptyDir: {}
+  restartPolicy: Never

@@ -1,9 +1,10 @@
 package git
 
 import (
-	"code.gitea.io/sdk/gitea"
 	"fmt"
 	"os"
+
+	"code.gitea.io/sdk/gitea"
 )
 
 type GiteaService struct {

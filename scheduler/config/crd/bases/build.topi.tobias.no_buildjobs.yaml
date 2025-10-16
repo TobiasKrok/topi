@@ -47,6 +47,8 @@ spec:
                 type: string
               repository:
                 type: string
+              suspend:
+                type: boolean
             required:
             - artefactName
             - owner
@@ -56,24 +58,42 @@ spec:
           status:
             description: status defines the observed state of BuildJob
             properties:
-              artefactName:
-                description: |-
-                  INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-                  Important: Run "make" to regenerate code after modifying this file
-                type: string
               buildEnd:
+                description: BuildEnd is when the build ended
                 format: date-time
                 type: string
               buildStart:
+                description: BuildStart is when the build started
                 format: date-time
                 type: string
-              duration:
+              buildid:
+                description: BuildID is the unique identifier for this build
                 type: string
-            required:
-            - artefactName
-            - buildEnd
-            - buildStart
-            - duration
+              commitsha:
+                description: The commit sha, used to find the required config map
+                type: string
+              duration:
+                description: BuildDuration is how long the build took
+                type: string
+              message:
+                description: Message provides additional context about the current
+                  phase
+                type: string
+              phase:
+                description: Phase represents the current phase of the build job
+                enum:
+                - Pending
+                - Queued
+                - Running
+                - Succeeded
+                - Failed
+                - Cancelled
+                type: string
+              requiredProviders:
+                description: RequiredProviders lists the providers needed by the workflow
+                items:
+                  type: string
+                type: array
             type: object
         required:
         - spec

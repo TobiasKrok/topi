@@ -8,5 +8,5 @@ Some Claude has been used for suggestions on architecture and documentation
 Topi is an Azure Pipelines-like CI/CD sysSem consisting of three components:
 
 - **Engine**: HTTP server that listens to Git webhooks
-- **Scheduler**: Kubernetes operator that manages build jobs
+- **topi-operator**: Kubernetes operator for scheduling builds (more to come)
 - **Builder**: Application that builds projects based on workflows

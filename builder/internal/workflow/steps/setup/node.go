@@ -36,7 +36,7 @@ curl -fsSL https://deb.nodesource.com/setup_%s.x | sudo -E bash -
 echo "Installing Node.js %s..."
 sudo apt-get install -y nodejs
 
-`, n.version, n.version, n.version)
+`, n.version, n.version)
 
 	cmd := exec.Command("bash", "-c", installScript)
 	cmd.Stdout = os.Stdout
@@ -62,4 +62,3 @@ func (n *NodeStep) Name() string {
 func (n *NodeStep) Description() string {
 	return fmt.Sprintf("Install and set up Node.js %s with npm", n.version)
 }
-

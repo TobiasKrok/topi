@@ -441,7 +441,7 @@ import (
     corev1 "k8s.io/api/core/v1"
     "k8s.io/apimachinery/pkg/api/resource"
     metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-    "github.com/tobiaskrok/topi/scheduler/api/v1alpha1"
+    "github.com/tobiaskrok/topi/topi-operator/api/v1alpha1"
 )
 
 type BuilderPodConfig struct {

@@ -8,6 +8,7 @@ import (
 	"github.com/tobiaskrok/topi/builder/internal/workflow"
 	sharedworkflow "github.com/tobiaskrok/topi/shared/workflow"
 	"gopkg.in/src-d/go-git.v4"
+	"gopkg.in/src-d/go-git.v4/plumbing/transport/http"
 )
 
 func init() {
@@ -34,16 +35,28 @@ func (s *CheckoutStep) Exec(ctx *workflow.WorkflowContext) (*workflow.StepResult
 	} else {
 		dest = ctx.Workspace
 	}
+
+	var auth *http.BasicAuth
+	if token := os.Getenv("GIT_TOKEN"); token != "" {
+		auth = &http.BasicAuth{
+			Username: "topi-builder",
+			Password: token,
+		}
+	} else {
+		log.Printf("[git] no token found, attempting unauthenticated clone")
+	}
+
 	log.Printf("Checking out to %s...", dest)
 	_, err := git.PlainClone(dest, false, &git.CloneOptions{
 		URL:      ctx.Source,
 		Progress: os.Stdout,
+		Auth:     auth,
 	})
 
 	if err != nil {
 		fmt.Println(fmt.Errorf("err:%s", err))
 		return &workflow.StepResult{
-			Status: workflow.StepSuccess,
+			Status: workflow.JobFailed,
 		}, err
 	}
 

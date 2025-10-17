@@ -9,7 +9,7 @@ SHELL = /usr/bin/env bash -o pipefail
 CONTAINER_TOOL ?= docker
 
 # Define modules
-MODULES := shared engine scheduler builder
+MODULES := shared engine topi-operator builder
 
 ##@ General
 
@@ -69,8 +69,8 @@ mod-tidy-all: ## Tidy go modules for all modules.
 build-all: ## Build all module binaries.
 	@echo "Building engine..."
 	$(MAKE) -C engine build
-	@echo "Building scheduler..."
-	$(MAKE) -C scheduler build
+	@echo "Building topi-operator..."
+	$(MAKE) -C topi-operator build
 	@echo "Building builder..."
 	$(MAKE) -C builder build
 
@@ -79,7 +79,7 @@ docker-build-all: ## Build Docker images for all modules.
 	@echo "Building engine Docker image..."
 	$(MAKE) -C engine docker-build
 	@echo "Building scheduler Docker image..."
-	$(MAKE) -C scheduler docker-build
+	$(MAKE) -C topi-operator docker-build
 	@echo "Building builder Docker image..."
 	$(MAKE) -C builder docker-build
 
@@ -88,7 +88,7 @@ docker-push-all: ## Push Docker images for all modules.
 	@echo "Pushing engine Docker image..."
 	$(MAKE) -C engine docker-push
 	@echo "Pushing scheduler Docker image..."
-	$(MAKE) -C scheduler docker-push
+	$(MAKE) -C topi-operator docker-push
 	@echo "Pushing builder Docker image..."
 	$(MAKE) -C builder docker-push
 
@@ -97,13 +97,13 @@ kind-push-all: ## Build and push all Docker images to local kind registry.
 	@echo "Building and pushing engine to kind registry..."
 	$(MAKE) -C engine kind-push
 	@echo "Building and pushing scheduler to kind registry..."
-	$(MAKE) -C scheduler kind-push
+	$(MAKE) -C topi-operator kind-push
 	@echo "Building and pushing builder to kind registry..."
 	$(MAKE) -C builder kind-push
 
 .PHONY: kind-deploy-scheduler
 kind-deploy-scheduler: ## Deploy scheduler to kind cluster using local registry.
-	$(MAKE) -C scheduler kind-deploy
+	$(MAKE) -C topi-operator kind-deploy
 
 ##@ Run
 
@@ -113,7 +113,7 @@ run-engine: ## Run engine from your host.
 
 .PHONY: run-scheduler
 run-scheduler: ## Run scheduler from your host.
-	$(MAKE) -C scheduler run
+	$(MAKE) -C topi-operator run
 
 .PHONY: run-builder
 run-builder: ## Run builder from your host.
@@ -137,19 +137,19 @@ dev-env-logs: ## Show logs from development environment.
 
 .PHONY: install-crds
 install-crds: ## Install CRDs into the K8s cluster.
-	$(MAKE) -C scheduler install
+	$(MAKE) -C topi-operator install
 
 .PHONY: uninstall-crds
 uninstall-crds: ## Uninstall CRDs from the K8s cluster.
-	$(MAKE) -C scheduler uninstall
+	$(MAKE) -C topi-operator uninstall
 
 .PHONY: deploy-scheduler
 deploy-scheduler: ## Deploy scheduler to the K8s cluster.
-	$(MAKE) -C scheduler deploy
+	$(MAKE) -C topi-operator deploy
 
 .PHONY: undeploy-scheduler
 undeploy-scheduler: ## Undeploy scheduler from the K8s cluster.
-	$(MAKE) -C scheduler undeploy
+	$(MAKE) -C topi-operator undeploy
 
 ##@ Workspace
 
@@ -170,4 +170,4 @@ clean: ## Clean build artifacts from all modules.
 
 .PHONY: test-e2e
 test-e2e: ## Run end-to-end tests.
-	$(MAKE) -C scheduler test-e2e
+	$(MAKE) -C topi-operator test-e2e

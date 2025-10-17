@@ -1,7 +1,7 @@
 # Image URL to use for building/pushing image
 IMG ?= topi-builder:latest
 # Local kind registry settings
-KIND_REGISTRY ?= localhost:5001
+KIND_REGISTRY ?= localhost:15001
 KIND_IMG ?= $(KIND_REGISTRY)/topi-builder:latest
 
 # CONTAINER_TOOL defines the container tool to be used for building images.
@@ -50,11 +50,11 @@ mod-tidy: ## Tidy go modules.
 
 .PHONY: build
 build: fmt vet ## Build builder binary.
-	go build -o bin/builder cmd/builder/main.go
+	go build -o bin/builder cmd/main.go
 
 .PHONY: run
 run: fmt vet ## Run builder from your host.
-	go run ./cmd/builder/main.go
+	go run ./cmd/main.go
 
 .PHONY: docker-build
 docker-build: ## Build docker image.

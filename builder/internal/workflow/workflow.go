@@ -16,7 +16,7 @@ func CreateWorkflowPlan(cfg sharedworkflow.WorkflowConfig, source string, worksp
 	if err != nil {
 		return nil, fmt.Errorf("failed to create environment manager: %w", err)
 	}
-	
+
 	ctx := &WorkflowContext{
 		Params:             make(map[string]string),
 		Workspace:          workspace,
@@ -89,7 +89,7 @@ func CreateWorkflowPlan(cfg sharedworkflow.WorkflowConfig, source string, worksp
 func (w *Workflow) Execute() {
 	start := time.Now()
 	log.Printf("Starting workflow %s at %s", w.Name, start)
-	
+
 	// Set standard Topi environment variables
 	if err := w.setSystemVariables(); err != nil {
 		log.Printf("Failed to set system variables: %v", err)
@@ -107,12 +107,12 @@ func (w *Workflow) Execute() {
 
 			err := w.EnvironmentManager.Load()
 			if err != nil {
-				log.Printf("Unrecoverable error while loading env vars: %w", err)
+				log.Printf("Unrecoverable error while loading env vars: %v", err)
 				os.Exit(1)
 			}
 			result, err := step.Exec(w.Ctx)
 			if err != nil && job.ErrorPolicy == "Stop" {
-				log.Printf("[%s] Step '%s' resulted in an error: %w", job.Name, step.Name(), err)
+				log.Printf("[%s] Step '%s' resulted in an error: %v", job.Name, step.Name(), err)
 				os.Exit(1)
 			}
 			w.setResult(job.Name, step.Name(), result)

@@ -1,0 +1,42 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - topi.io
+  resources:
+  - buildjobs
+  - jobs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - topi.io
+  resources:
+  - buildjobs/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - topi.io
+  resources:
+  - buildjobs/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - topi.io
+  resources:
+  - configmap
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch

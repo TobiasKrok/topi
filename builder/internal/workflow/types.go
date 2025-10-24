@@ -1,5 +1,7 @@
 package workflow
 
+import "context"
+
 type StepStatus int
 
 type JobStatus int
@@ -44,8 +46,8 @@ type WorkflowContext struct {
 	BuildID            string
 	Source             string // git repo
 	SystemDir          string
-	GitToken           string // Git authentication token (kept secret)
 	EnvironmentManager *EnvironmentManager
+	Context            context.Context
 }
 
 type Job struct {

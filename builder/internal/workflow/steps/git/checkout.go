@@ -1,14 +1,12 @@
 package git
 
 import (
-	"fmt"
 	"log"
 	"os"
 
+	"github.com/go-git/go-git/v5"
 	"github.com/tobiaskrok/topi/builder/internal/workflow"
 	sharedworkflow "github.com/tobiaskrok/topi/shared/workflow"
-	"gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/plumbing/transport/http"
 )
 
 func init() {
@@ -36,29 +34,26 @@ func (s *CheckoutStep) Exec(ctx *workflow.WorkflowContext) (*workflow.StepResult
 		dest = ctx.Workspace
 	}
 
-	var auth *http.BasicAuth
-	if token := os.Getenv("GIT_TOKEN"); token != "" {
-		auth = &http.BasicAuth{
-			Username: "topi-builder",
-			Password: token,
-		}
-	} else {
-		log.Printf("[git] no token found, attempting unauthenticated clone")
-	}
-
-	log.Printf("Checking out to %s...", dest)
+	// Try cloning without authentication first (for public repos)
+	log.Printf("Checking out %s to %s...", ctx.Source, dest)
 	_, err := git.PlainClone(dest, false, &git.CloneOptions{
 		URL:      ctx.Source,
 		Progress: os.Stdout,
-		Auth:     auth,
 	})
 
+	// If authentication is required and we have a token, retry with token
+	// For Gitea private repos, you need to provide: username:token@host
+	// Since we only have the token, we can't authenticate to private repos yet
+	// TODO: Add GITEA_USERNAME env var for private repo support
+
 	if err != nil {
-		fmt.Println(fmt.Errorf("err:%s", err))
+		log.Printf("[git] Clone failed: %v", err)
 		return &workflow.StepResult{
 			Status: workflow.JobFailed,
 		}, err
 	}
+
+	log.Printf("[git] Successfully cloned repository")
 
 	return &workflow.StepResult{
 		Status: workflow.StepSuccess,

@@ -1,6 +1,7 @@
 package workflow
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -9,7 +10,7 @@ import (
 	sharedworkflow "github.com/tobiaskrok/topi/shared/workflow"
 )
 
-func CreateWorkflowPlan(cfg sharedworkflow.WorkflowConfig, source string, workspace string, systemDir string, gitToken string) (*Workflow, error) {
+func CreateWorkflowPlan(ctx context.Context, cfg sharedworkflow.WorkflowConfig, source string, workspace string, systemDir string) (*Workflow, error) {
 	//TODO: BUILD ID
 	buildID := "12345"
 	em, err := NewEnvironmentManager(systemDir, buildID)
@@ -17,14 +18,14 @@ func CreateWorkflowPlan(cfg sharedworkflow.WorkflowConfig, source string, worksp
 		return nil, fmt.Errorf("failed to create environment manager: %w", err)
 	}
 
-	ctx := &WorkflowContext{
+	wfCtx := &WorkflowContext{
 		Params:             make(map[string]string),
 		Workspace:          workspace,
 		BuildID:            buildID,
 		Source:             source,
 		SystemDir:          systemDir,
-		GitToken:           gitToken,
 		EnvironmentManager: em,
+		Context:            ctx,
 	}
 
 	// set env vars and sets WF_ prefix for workflow envs
@@ -71,7 +72,7 @@ func CreateWorkflowPlan(cfg sharedworkflow.WorkflowConfig, source string, worksp
 
 	wf := &Workflow{
 		Name:               cfg.Name,
-		Ctx:                ctx,
+		Ctx:                wfCtx,
 		Jobs:               jobs,
 		Results:            make(map[string]map[string]*StepResult),
 		EnvironmentManager: em,

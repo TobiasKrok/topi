@@ -55,6 +55,22 @@ func (e *EnvironmentManager) Set(key, value string) error {
 	return err
 }
 
+func (e *EnvironmentManager) Get(key string) (string, error) {
+
+	if val, ok := e.env[key]; ok && val != "" {
+		return val, nil
+	}
+	// if val, ok := ctx.Secrets[key]; ok {
+	//     return val
+	// }
+
+	if val, exists := os.LookupEnv(key); exists {
+		return val, nil
+	}
+
+	return "", fmt.Errorf("environment variable %s not found", key)
+}
+
 func (e *EnvironmentManager) Load() error {
 	content, err := os.ReadFile(e.workflowFile)
 	if err != nil {

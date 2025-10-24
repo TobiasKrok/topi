@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -55,15 +56,14 @@ func main() {
 		systemDir = "/opt/topi/system"
 	}
 
-	// Get Git token for authentication (optional)
-	gitToken := os.Getenv("GIT_TOKEN")
-
 	config, err := config.LoadAndParse(sourceWorkflow)
 	if err != nil {
 		log.Println(fmt.Errorf("system error: %w", err))
 		os.Exit(1)
 	}
-	wf, err := workflow.CreateWorkflowPlan(config, repo, workspace, systemDir, gitToken)
+	//TODO: do more with contedt
+	ctx := context.Background()
+	wf, err := workflow.CreateWorkflowPlan(ctx, config, repo, workspace, systemDir)
 	if err != nil {
 		log.Println(fmt.Errorf("system error: %w", err))
 		os.Exit(1)

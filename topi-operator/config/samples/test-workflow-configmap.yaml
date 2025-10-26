@@ -28,8 +28,5 @@ data:
               echo "In workspace: $TOPI_WORKSPACE"
               chmod +x test.sh
               ./test.sh
-          - name: "Setup go"
-            uses: "setup/go"
-          - name: "Check version"
-            run: |
-              go version
+          - name: "Upload MinIO"
+            uses: "artefact/minio"

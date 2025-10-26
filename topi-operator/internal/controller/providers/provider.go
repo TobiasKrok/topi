@@ -30,7 +30,6 @@ type ResourceProvider interface {
 
 func GetProvidersFromWorkflow(ctx context.Context, wf workflow.WorkflowConfig) ([]string, error) {
 
-	fmt.Println(wf)
 	log := logf.FromContext(ctx)
 	var providers []string
 	for _, provider := range registry {

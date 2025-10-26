@@ -4,9 +4,11 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"context"
+	"crypto/tls"
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 
@@ -30,6 +32,7 @@ type MinioArtefactStep struct {
 	accessKey string
 	bucket    string
 	endpoint  string
+	useSSL    bool
 	owner     string
 	repo      string
 }
@@ -52,7 +55,16 @@ func (s *MinioArtefactStep) Exec(ctx *workflow.WorkflowContext) (*workflow.StepR
 			Status: workflow.JobFailed,
 		}, err
 	}
-	client, err := minio.New(s.endpoint, &minio.Options{Creds: credentials.NewStaticV4(s.accessKey, s.secretKey, "")})
+	// Create custom transport that skips TLS verification for self-signed certs
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	client, err := minio.New(s.endpoint, &minio.Options{
+		Creds:     credentials.NewStaticV4(s.accessKey, s.secretKey, ""),
+		Secure:    s.useSSL,
+		Transport: transport,
+	})
 
 	if err != nil {
 		log.Printf("[minio] Failed to initialize MinIO client: %v", err)
@@ -123,6 +135,12 @@ func (s *MinioArtefactStep) setConfiguration(ctx *workflow.WorkflowContext) erro
 		return fmt.Errorf("missing environment variable MINIO_BUCKET")
 	}
 
+	// Check if SSL should be used (defaults to false if not set)
+	useSSL := false
+	if sslStr, err := ctx.EnvironmentManager.Get("MINIO_USE_SSL"); err == nil {
+		useSSL = sslStr == "true" || sslStr == "1"
+	}
+
 	owner, repo, err := utils.ParseGitURL(ctx.Source)
 	if err != nil {
 		return fmt.Errorf("failed to parse source URL '%s': %w", ctx.Source, err)
@@ -136,6 +154,7 @@ func (s *MinioArtefactStep) setConfiguration(ctx *workflow.WorkflowContext) erro
 	s.secretKey = key
 	s.endpoint = endpoint
 	s.bucket = bucket
+	s.useSSL = useSSL
 	s.owner = owner
 	s.repo = repo
 	return nil

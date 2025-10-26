@@ -6,7 +6,7 @@ metadata:
   annotations:
     builder.topi.io/commit-sha: "test-workflow-abc123"
 spec:
-  repository: "http://gitea:3000/topi/topi-test"
+  repository: "http://gitea:3000/topi/topi-test.git"
   ref: "main"
   owner: "topi"
   artefactName: "test-artifact"

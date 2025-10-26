@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: provider-minio
+  namespace: topi-builds
+data:
+  endpoint: "minio-tenant-hl.topi-system.svc.cluster.local:9000"
+  bucket: "artefact"
+  use-ssl: "false"

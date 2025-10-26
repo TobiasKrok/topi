@@ -1,3 +1,35 @@
-# More info: https://docs.docker.com/engine/reference/builder/#dockerignore-file
-# Ignore build and test binaries.
-bin/
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+docs/
+
+# Development files
+.env
+*.log
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts (keep source code!)
+builder/bin/*
+scheduler/bin/*
+engine/bin/*
+
+# Test files
+*_test.go
+test-workflows/
+
+# Don't ignore what we need for building
+!shared/
+!builder/
+!scheduler/

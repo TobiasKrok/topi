@@ -25,3 +25,18 @@ go.work
 *.swp
 *.swo
 *~
+
+# Environment files
+.env
+.env.*
+*.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# OS files
+.DS_Store
+
+
+docs/

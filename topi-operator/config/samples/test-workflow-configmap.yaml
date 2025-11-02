@@ -22,11 +22,13 @@ data:
               message: "Starting build process in workspace: ${TOPI_WORKSPACE}"
           - name: "Checkout"
             uses: "git/checkout"
-          - name: "Run script"
+          - name: "Setup Node"
+            uses: "setup/node"
+          - name: "Install and build"
             run: |
-              cd $TOPI_WORKSPACE
-              echo "In workspace: $TOPI_WORKSPACE"
-              chmod +x test.sh
-              ./test.sh
+              npm install
+              npm run build
           - name: "Upload MinIO"
             uses: "artefact/minio"
+            params:
+              source: ${TOPI_WORKSPACE}/dist

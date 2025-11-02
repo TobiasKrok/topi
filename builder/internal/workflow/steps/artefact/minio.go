@@ -42,7 +42,7 @@ func newMinioArtefactStep(cfg sharedworkflow.StepConfig) (workflow.Step, error) 
 
 	return &MinioArtefactStep{
 		name:   cfg.Name,
-		source: cfg.Params["source"],
+		source: cfg.Params["source"], // look in setConfiguration, it is exapnded
 	}, nil
 }
 
@@ -55,7 +55,6 @@ func (s *MinioArtefactStep) Exec(ctx *workflow.WorkflowContext) (*workflow.StepR
 			Status: workflow.JobFailed,
 		}, err
 	}
-	// Create custom transport that skips TLS verification for self-signed certs
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
@@ -135,7 +134,6 @@ func (s *MinioArtefactStep) setConfiguration(ctx *workflow.WorkflowContext) erro
 		return fmt.Errorf("missing environment variable MINIO_BUCKET")
 	}
 
-	// Check if SSL should be used (defaults to false if not set)
 	useSSL := false
 	if sslStr, err := ctx.EnvironmentManager.Get("MINIO_USE_SSL"); err == nil {
 		useSSL = sslStr == "true" || sslStr == "1"
@@ -157,6 +155,7 @@ func (s *MinioArtefactStep) setConfiguration(ctx *workflow.WorkflowContext) erro
 	s.useSSL = useSSL
 	s.owner = owner
 	s.repo = repo
+	s.source = ctx.EnvironmentManager.ExpandString(s.source)
 	return nil
 }
 

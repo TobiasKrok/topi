@@ -86,7 +86,7 @@ func (s *MinioArtefactStep) Exec(ctx *workflow.WorkflowContext) (*workflow.StepR
 		}, err
 	}
 
-	err = s.zipAndUpload(client, ctx.Context)
+	err = s.zipAndUpload(client, ctx.Context, ctx.BuildID)
 
 	if err != nil {
 		log.Printf("[minio] Failed to upload artefact: %v", err)
@@ -159,7 +159,7 @@ func (s *MinioArtefactStep) setConfiguration(ctx *workflow.WorkflowContext) erro
 	return nil
 }
 
-func (s *MinioArtefactStep) zipAndUpload(client *minio.Client, ctx context.Context) error {
+func (s *MinioArtefactStep) zipAndUpload(client *minio.Client, ctx context.Context, buildId string) error {
 	// Create temp tar.gz file
 	tarFile, err := os.CreateTemp("", "upload-*.tar.gz")
 	if err != nil {
@@ -168,15 +168,12 @@ func (s *MinioArtefactStep) zipAndUpload(client *minio.Client, ctx context.Conte
 	defer os.Remove(tarFile.Name())
 	defer tarFile.Close()
 
-	// Create gzip writer
 	gzWriter := gzip.NewWriter(tarFile)
 	defer gzWriter.Close()
 
-	// Create tar writer
 	tarWriter := tar.NewWriter(gzWriter)
 	defer tarWriter.Close()
 
-	// Walk the folder and add files to tar
 	err = filepath.Walk(s.source, func(file string, fi os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -221,7 +218,7 @@ func (s *MinioArtefactStep) zipAndUpload(client *minio.Client, ctx context.Conte
 	tarWriter.Close()
 	gzWriter.Close()
 
-	objectPath := fmt.Sprintf("/%s/%s/artefact.tar.gz", s.owner, s.repo)
+	objectPath := fmt.Sprintf("/%s/%s/%s.tar.gz", s.owner, s.repo, buildId)
 	_, err = client.FPutObject(ctx, s.bucket, objectPath, tarFile.Name(),
 		minio.PutObjectOptions{
 			ContentType: "application/gzip",

@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: buildkit
+  namespace: topi-system
+  labels:
+    app: buildkit
+    topi.io/component: builder
+spec:
+  type: ClusterIP
+  selector:
+    app: buildkit
+    topi.io/component: builder
+  ports:
+  - name: buildkit
+    protocol: TCP
+    port: 1234
+    targetPort: 1234
+  # For development/debugging, you can expose as NodePort:
+  # type: NodePort
+  # ports:
+  # - name: buildkit
+  #   protocol: TCP
+  #   port: 1234
+  #   targetPort: 1234
+  #   nodePort: 31234

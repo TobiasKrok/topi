@@ -24,9 +24,12 @@ COPY builder/internal/ internal/
 # Build
 RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -a -o builder cmd/main.go
 
+# we need the buildctl tool
+FROM moby/buildkit:v0.25.2 AS buildkit
 # Use Debian slim for better compatibility with installation scripts
 FROM debian:12-slim
 
+COPY --from=buildkit /usr/bin/buildctl /usr/local/bin/buildctl
 # Install essential tools and create workspace
 RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \

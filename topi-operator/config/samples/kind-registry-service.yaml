@@ -1,0 +1,29 @@
+# Service for Kind local registry
+# This creates a Kubernetes Service that routes traffic to the kind-registry container
+# running on the Docker network
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry
+  namespace: topi-system
+spec:
+  ports:
+  - port: 5000
+    protocol: TCP
+    targetPort: 5000
+  clusterIP: None
+---
+# Manual Endpoints pointing to the kind-registry container's IP
+# Update the IP address if your kind-registry has a different IP
+# Get current IP: docker inspect kind-registry | grep IPAddress
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: registry
+  namespace: topi-system
+subsets:
+- addresses:
+  - ip: 192.168.147.7  # kind-registry container IP on Docker network
+  ports:
+  - port: 5000
+    protocol: TCP

@@ -32,3 +32,8 @@ data:
             uses: "artefact/minio"
             params:
               source: ${TOPI_WORKSPACE}/dist
+          - name: "Build docker"
+            uses: "docker/build"
+            params:
+              registry: http://registry.topi-system.svc.cluster.local:5000
+              image: web

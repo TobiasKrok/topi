@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: topi-system
+  labels:
+    app.kubernetes.io/name: topi
+    app.kubernetes.io/component: system

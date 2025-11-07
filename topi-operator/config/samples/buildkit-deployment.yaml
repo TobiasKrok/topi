@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: buildkit
+  namespace: topi-system
+  labels:
+    app: buildkit
+    topi.io/component: builder
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: buildkit
+      topi.io/component: builder
+  template:
+    metadata:
+      labels:
+        app: buildkit
+        topi.io/component: builder
+    spec:
+      containers:
+      - name: buildkitd
+        image: moby/buildkit:buildx-stable-1
+        args:
+        - --addr
+        - tcp://0.0.0.0:1234
+        - --allow-insecure-entitlement=network.host
+        # Uncomment below for TLS support (requires certificates)
+        # - --tlscacert=/certs/ca.pem
+        # - --tlscert=/certs/server-cert.pem
+        # - --tlskey=/certs/server-key.pem
+        ports:
+        - name: buildkit
+          containerPort: 1234
+          protocol: TCP
+        readinessProbe:
+          exec:
+            command:
+            - buildctl
+            - --addr
+            - tcp://127.0.0.1:1234
+            - debug
+            - workers
+          periodSeconds: 10
+          timeoutSeconds: 1
+          failureThreshold: 3
+          successThreshold: 1
+        livenessProbe:
+          exec:
+            command:
+            - buildctl
+            - --addr
+            - tcp://127.0.0.1:1234
+            - debug
+            - workers
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: buildkit-cache
+          mountPath: /var/lib/buildkit
+        # Uncomment for TLS support
+        # - name: certs
+        #   mountPath: /certs
+        #   readOnly: true
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 2000m
+            memory: 4Gi
+      volumes:
+      - name: buildkit-cache
+        persistentVolumeClaim:
+          claimName: buildkit-cache
+        # For development without persistent cache, use emptyDir instead:
+        # emptyDir: {}
+      # Uncomment for TLS support
+      # - name: certs
+      #   secret:
+      #     secretName: buildkit-server-certs
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30

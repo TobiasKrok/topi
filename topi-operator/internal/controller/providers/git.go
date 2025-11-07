@@ -33,14 +33,14 @@ func (g *GitProvider) Preflight(ctx context.Context, cl client.Client) error {
 		Namespace: "topi-builds",
 	}, &secret); err != nil {
 		if errors.IsNotFound(err) {
-			return fmt.Errorf("could not find secret 'git-token' in namespace 'topi-build'")
+			return fmt.Errorf("could not find secret 'provider-git-token' in namespace 'topi-builds'")
 		}
 		return err
 	}
 
 	token := string(secret.Data["token"])
 	if token == "" {
-		return fmt.Errorf("'token' is missing from 'git-token' secret")
+		return fmt.Errorf("'token' is missing from 'provider-git-token' secret in namespace 'topi-builds'")
 	}
 
 	return nil

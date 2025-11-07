@@ -23,9 +23,9 @@ func register(p ResourceProvider) {
 
 type ResourceProvider interface {
 	Name() string
-	Preflight(ctx context.Context, cl client.Client) error
+	Preflight(ctx context.Context, cl client.Client) error // check if the provider has everything it needs to run, configs, other deployments or services
 	IsRequired(wf workflow.WorkflowConfig) (bool, error)
-	Inject(ctx context.Context, job *batchv1.Job, buildJob *v1.BuildJob) error
+	Inject(ctx context.Context, job *batchv1.Job, buildJob *v1.BuildJob) error // inject things into the job or buildjob, like env variables or secret mounts
 }
 
 func GetProvidersFromWorkflow(ctx context.Context, wf workflow.WorkflowConfig) ([]string, error) {

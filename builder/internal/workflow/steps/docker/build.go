@@ -47,8 +47,7 @@ func (s *DockerBuildStep) Exec(ctx *workflow.WorkflowContext) (*workflow.StepRes
 
 	//TODO: TLS, insecure false!!
 	buildx := fmt.Sprintf("buildctl --addr tcp://buildkit.topi-system.svc.cluster.local:1234 build --frontend=dockerfile.v0 --local context=. --local dockerfile=. --output type=image,name=%s/%s:%s,push=true,insecure=true", s.registry, s.image, s.tag)
-	cmd := exec.Command("bash", "-c", buildx) // Example command
-	//TODO: checks, does the image now exist in the registry?
+	cmd := exec.Command("bash", "-c", buildx)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 

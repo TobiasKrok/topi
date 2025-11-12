@@ -46,14 +46,15 @@ func newMinioArtefactStep(cfg sharedworkflow.StepConfig) (workflow.Step, error) 
 	}, nil
 }
 
-func (s *MinioArtefactStep) Exec(ctx *workflow.WorkflowContext) (*workflow.StepResult, error) {
+func (s *MinioArtefactStep) Exec(ctx *workflow.WorkflowContext) *workflow.StepResult {
 
 	err := s.setConfiguration(ctx)
 	if err != nil {
 		log.Printf("[minio] Configuration error: %v", err)
 		return &workflow.StepResult{
 			Status: workflow.JobFailed,
-		}, err
+			Error:  err,
+		}
 	}
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -69,21 +70,24 @@ func (s *MinioArtefactStep) Exec(ctx *workflow.WorkflowContext) (*workflow.StepR
 		log.Printf("[minio] Failed to initialize MinIO client: %v", err)
 		return &workflow.StepResult{
 			Status: workflow.JobFailed,
-		}, err
+			Error:  err,
+		}
 	}
 	exists, err := client.BucketExists(ctx.Context, s.bucket)
 	if err != nil {
 		log.Printf("[minio] Failed to check if bucket exists: %v", err)
 		return &workflow.StepResult{
 			Status: workflow.JobFailed,
-		}, err
+			Error:  err,
+		}
 	}
 
 	if !exists {
 		log.Printf("[minio] Bucket %s does not exist", s.bucket)
 		return &workflow.StepResult{
 			Status: workflow.JobFailed,
-		}, err
+			Error:  err,
+		}
 	}
 
 	err = s.zipAndUpload(client, ctx.Context, ctx.BuildID)
@@ -92,13 +96,14 @@ func (s *MinioArtefactStep) Exec(ctx *workflow.WorkflowContext) (*workflow.StepR
 		log.Printf("[minio] Failed to upload artefact: %v", err)
 		return &workflow.StepResult{
 			Status: workflow.JobFailed,
-		}, err
+			Error:  err,
+		}
 	}
 
 	log.Printf("[minio] Successfully uploaded artefact to %s/%s/%s", s.bucket, s.owner, s.repo)
 	return &workflow.StepResult{
 		Status: workflow.JobSuccess,
-	}, nil
+	}
 }
 
 func (s *MinioArtefactStep) Name() string {

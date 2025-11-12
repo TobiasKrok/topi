@@ -28,7 +28,7 @@ func newGolangStep(cfg sharedworkflow.StepConfig) (workflow.Step, error) {
 	}, nil
 }
 
-func (g *GolangStep) Exec(ctx *workflow.WorkflowContext) (*workflow.StepResult, error) {
+func (g *GolangStep) Exec(ctx *workflow.WorkflowContext) *workflow.StepResult {
 
 	// Determine architecture
 	arch := runtime.GOARCH
@@ -57,7 +57,8 @@ rm /tmp/go%s.tar.gz
 	if err := cmd.Run(); err != nil {
 		return &workflow.StepResult{
 			Status: workflow.StepFailed,
-		}, fmt.Errorf("failed to install Go %s: %w", g.version, err)
+			Error:  fmt.Errorf("failed to install Go %s: %w", g.version, err),
+		}
 	}
 
 	os.Setenv("PATH", "/usr/local/go/bin:"+os.Getenv("PATH"))
@@ -65,7 +66,7 @@ rm /tmp/go%s.tar.gz
 
 	return &workflow.StepResult{
 		Status: workflow.StepSuccess,
-	}, nil
+	}
 }
 
 func (g *GolangStep) Name() string {

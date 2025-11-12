@@ -26,7 +26,7 @@ func newCHeckoutStep(cfg sharedworkflow.StepConfig) (workflow.Step, error) {
 }
 
 // TODO: Context
-func (s *CheckoutStep) Exec(ctx *workflow.WorkflowContext) (*workflow.StepResult, error) {
+func (s *CheckoutStep) Exec(ctx *workflow.WorkflowContext) *workflow.StepResult {
 	var dest string
 	if s.destination != "" {
 		dest = s.destination
@@ -50,14 +50,15 @@ func (s *CheckoutStep) Exec(ctx *workflow.WorkflowContext) (*workflow.StepResult
 		log.Printf("[git] Clone failed: %v", err)
 		return &workflow.StepResult{
 			Status: workflow.JobFailed,
-		}, err
+			Error:  err,
+		}
 	}
 
 	log.Printf("[git] Successfully cloned repository")
 
 	return &workflow.StepResult{
 		Status: workflow.StepSuccess,
-	}, nil
+	}
 }
 
 func (s *CheckoutStep) Name() string {

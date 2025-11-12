@@ -29,11 +29,11 @@ func newEchoStep(cfg sharedworkflow.StepConfig) (workflow.Step, error) {
 	}, nil
 }
 
-func (s *EchoStep) Exec(ctx *workflow.WorkflowContext) (*workflow.StepResult, error) {
+func (s *EchoStep) Exec(ctx *workflow.WorkflowContext) *workflow.StepResult {
 	fmt.Println(ctx.EnvironmentManager.ExpandString(s.message))
 	return &workflow.StepResult{
 		Status: workflow.StepSuccess,
-	}, nil
+	}
 }
 
 func (s *EchoStep) Name() string {

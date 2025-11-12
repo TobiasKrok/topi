@@ -60,11 +60,12 @@ type Job struct {
 type Step interface {
 	Name() string
 	Description() string
-	Exec(ctx *WorkflowContext) (*StepResult, error)
+	Exec(ctx *WorkflowContext) *StepResult
 }
 
 type StepResult struct {
 	// StdOut string
 	// Outputs map[string]string
 	Status StepStatus
+	Error  error
 }

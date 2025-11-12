@@ -27,7 +27,7 @@ func newNodeStep(cfg sharedworkflow.StepConfig) (workflow.Step, error) {
 	}, nil
 }
 
-func (n *NodeStep) Exec(ctx *workflow.WorkflowContext) (*workflow.StepResult, error) {
+func (n *NodeStep) Exec(ctx *workflow.WorkflowContext) *workflow.StepResult {
 	installScript := fmt.Sprintf(`
 set -e
 
@@ -45,14 +45,15 @@ sudo apt-get install -y nodejs
 	if err := cmd.Run(); err != nil {
 		return &workflow.StepResult{
 			Status: workflow.StepFailed,
-		}, fmt.Errorf("failed to install Node.js %s: %w", n.version, err)
+			Error:  fmt.Errorf("failed to install Node.js %s: %w", n.version, err),
+		}
 	}
 
 	os.Setenv("PATH", "/usr/bin:"+os.Getenv("PATH"))
 
 	return &workflow.StepResult{
 		Status: workflow.StepSuccess,
-	}, nil
+	}
 }
 
 func (n *NodeStep) Name() string {

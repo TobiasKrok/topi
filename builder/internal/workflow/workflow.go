@@ -111,9 +111,9 @@ func (w *Workflow) Execute() {
 				log.Printf("Unrecoverable error while loading env vars: %v", err)
 				os.Exit(1)
 			}
-			result, err := step.Exec(w.Ctx)
-			if err != nil && job.ErrorPolicy == "Stop" {
-				log.Printf("[%s] Step '%s' resulted in an error: %v", job.Name, step.Name(), err)
+			result := step.Exec(w.Ctx)
+			if result.Error != nil {
+				log.Printf("[%s] Step '%s' resulted in an error: %v", job.Name, step.Name(), result.Error)
 				os.Exit(1)
 			}
 			w.setResult(job.Name, step.Name(), result)

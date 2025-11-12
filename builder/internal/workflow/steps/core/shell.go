@@ -35,7 +35,7 @@ func newShellStep(cfg sharedworkflow.StepConfig) (workflow.Step, error) {
 	}, nil
 }
 
-func (s *ShellStep) Exec(ctx *workflow.WorkflowContext) (*workflow.StepResult, error) {
+func (s *ShellStep) Exec(ctx *workflow.WorkflowContext) *workflow.StepResult {
 	expanded := ctx.EnvironmentManager.ExpandString(s.cmd)
 
 	cmd := exec.Command("bash", "-c", expanded) // Example command
@@ -47,12 +47,13 @@ func (s *ShellStep) Exec(ctx *workflow.WorkflowContext) (*workflow.StepResult, e
 		fmt.Print(err)
 		return &workflow.StepResult{
 			Status: workflow.StepFailed,
-		}, err
+			Error:  err,
+		}
 	}
 
 	return &workflow.StepResult{
 		Status: workflow.StepSuccess,
-	}, nil
+	}
 }
 
 func (s *ShellStep) Name() string {

@@ -55,12 +55,6 @@ func CreateWorkflowPlan(ctx context.Context, cfg sharedworkflow.WorkflowConfig, 
 			if err != nil {
 				return nil, fmt.Errorf("step '%s' in job '%s' is invalid. %w", s.Name, jobName, err)
 			}
-			for k, v := range s.Env {
-				if err := em.Set(k, v); err != nil {
-					return nil, fmt.Errorf("failed to step '%s' while setting env variable '%s': %w ", s.Name, k, err)
-				}
-
-			}
 			steps = append(steps, step)
 		}
 		jobs = append(jobs, Job{
@@ -107,6 +101,13 @@ func (w *Workflow) Execute() {
 			log.Printf("[%s] Running step '%s'", job.Name, step.Name())
 
 			err := w.EnvironmentManager.Load()
+			for k, v := range step {
+				if err := w.EnvironmentManager.Set(k, v); err != nil {
+					//TODO: error handling
+					// return nil, fmt.Errorf("failed to step '%s' while setting env variable '%s': %w ", s.Name, k, err)
+				}
+
+			}
 			if err != nil {
 				log.Printf("Unrecoverable error while loading env vars: %v", err)
 				os.Exit(1)
@@ -123,6 +124,7 @@ func (w *Workflow) Execute() {
 	//TODO: better logging, duration and that
 }
 
+// TODO: this will be random order
 func getJobKeys(jobs map[string]sharedworkflow.JobConfig) []string {
 
 	j := make([]string, 0, len(jobs))

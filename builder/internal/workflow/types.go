@@ -13,7 +13,7 @@ const (
 )
 
 const (
-	JobFailed StepStatus = iota
+	JobFailed JobStatus = iota
 	JobPartial
 	JobSkipped
 	JobSuccess

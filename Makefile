@@ -110,7 +110,6 @@ kind-deploy-scheduler: ## Deploy scheduler to kind cluster using local registry.
 .PHONY: run-engine
 run-engine: ## Run engine from your host.
 	$(MAKE) -C engine run
-
 .PHONY: run-scheduler
 run-scheduler: ## Run scheduler from your host.
 	$(MAKE) -C topi-operator run

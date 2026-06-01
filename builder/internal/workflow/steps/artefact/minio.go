@@ -52,7 +52,7 @@ func (s *MinioArtefactStep) Exec(ctx *workflow.WorkflowContext) *workflow.StepRe
 	if err != nil {
 		log.Printf("[minio] Configuration error: %v", err)
 		return &workflow.StepResult{
-			Status: workflow.JobFailed,
+			Status: workflow.StepFailed,
 			Error:  err,
 		}
 	}
@@ -69,7 +69,7 @@ func (s *MinioArtefactStep) Exec(ctx *workflow.WorkflowContext) *workflow.StepRe
 	if err != nil {
 		log.Printf("[minio] Failed to initialize MinIO client: %v", err)
 		return &workflow.StepResult{
-			Status: workflow.JobFailed,
+			Status: workflow.StepFailed,
 			Error:  err,
 		}
 	}
@@ -77,7 +77,7 @@ func (s *MinioArtefactStep) Exec(ctx *workflow.WorkflowContext) *workflow.StepRe
 	if err != nil {
 		log.Printf("[minio] Failed to check if bucket exists: %v", err)
 		return &workflow.StepResult{
-			Status: workflow.JobFailed,
+			Status: workflow.StepFailed,
 			Error:  err,
 		}
 	}
@@ -85,7 +85,7 @@ func (s *MinioArtefactStep) Exec(ctx *workflow.WorkflowContext) *workflow.StepRe
 	if !exists {
 		log.Printf("[minio] Bucket %s does not exist", s.bucket)
 		return &workflow.StepResult{
-			Status: workflow.JobFailed,
+			Status: workflow.StepFailed,
 			Error:  err,
 		}
 	}
@@ -95,20 +95,19 @@ func (s *MinioArtefactStep) Exec(ctx *workflow.WorkflowContext) *workflow.StepRe
 	if err != nil {
 		log.Printf("[minio] Failed to upload artefact: %v", err)
 		return &workflow.StepResult{
-			Status: workflow.JobFailed,
+			Status: workflow.StepFailed,
 			Error:  err,
 		}
 	}
 
 	log.Printf("[minio] Successfully uploaded artefact to %s/%s/%s", s.bucket, s.owner, s.repo)
 	return &workflow.StepResult{
-		Status: workflow.JobSuccess,
+		Status: workflow.StepSuccess,
 	}
 }
 
 func (s *MinioArtefactStep) Name() string {
-	if s.name == "" {
-
+	if s.name != "" {
 		return s.name
 	}
 	return "Upload MinIO Artefact"

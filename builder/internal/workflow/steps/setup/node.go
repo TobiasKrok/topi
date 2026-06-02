@@ -28,6 +28,7 @@ func newNodeStep(cfg sharedworkflow.StepConfig) (workflow.Step, error) {
 }
 
 func (n *NodeStep) Exec(ctx *workflow.WorkflowContext) *workflow.StepResult {
+	//TODO: shell escape,this is dangerous!!!
 	installScript := fmt.Sprintf(`
 set -e
 

@@ -49,7 +49,7 @@ func (s *CheckoutStep) Exec(ctx *workflow.WorkflowContext) *workflow.StepResult 
 	if err != nil {
 		log.Printf("[git] Clone failed: %v", err)
 		return &workflow.StepResult{
-			Status: workflow.JobFailed,
+			Status: workflow.StepFailed,
 			Error:  err,
 		}
 	}

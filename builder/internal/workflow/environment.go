@@ -60,9 +60,6 @@ func (e *EnvironmentManager) Get(key string) (string, error) {
 	if val, ok := e.env[key]; ok && val != "" {
 		return val, nil
 	}
-	// if val, ok := ctx.Secrets[key]; ok {
-	//     return val
-	// }
 
 	if val, exists := os.LookupEnv(key); exists {
 		return val, nil
@@ -71,6 +68,8 @@ func (e *EnvironmentManager) Get(key string) (string, error) {
 	return "", fmt.Errorf("environment variable %s not found", key)
 }
 
+// Load reads environment variables from the workflow file, validates, and sets them into the process environment.
+// Returns an error if there are issues reading the file, parsing its content, or setting environment variables.
 func (e *EnvironmentManager) Load() error {
 	content, err := os.ReadFile(e.workflowFile)
 	if err != nil {

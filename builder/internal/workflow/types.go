@@ -32,11 +32,10 @@ func (ss StepStatus) String() string {
 // Workflow -> Job -> Steps
 
 type Workflow struct {
-	Name               string
-	Ctx                *WorkflowContext
-	Jobs               []Job
-	Results            map[string]map[string]*StepResult // jpb name -> step -> result
-	EnvironmentManager *EnvironmentManager
+	Name    string
+	Ctx     *WorkflowContext
+	Jobs    []Job
+	Results map[string]map[string]*StepResult // job name -> step -> result
 }
 
 // TODO secrets

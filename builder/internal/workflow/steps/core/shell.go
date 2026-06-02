@@ -36,6 +36,7 @@ func newShellStep(cfg sharedworkflow.StepConfig) (workflow.Step, error) {
 }
 
 func (s *ShellStep) Exec(ctx *workflow.WorkflowContext) *workflow.StepResult {
+	// shell escpae
 	expanded := ctx.EnvironmentManager.ExpandString(s.cmd)
 
 	cmd := exec.Command("bash", "-c", expanded) // Example command

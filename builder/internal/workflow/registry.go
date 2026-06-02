@@ -23,7 +23,6 @@ func GetStepFactory(stepType string) (StepFactory, bool) {
 	return factory, ok
 }
 
-// TODO: allow empty "uses" and just use "run" to run a shell script
 func NewStep(cfg sharedworkflow.StepConfig) (Step, error) {
 	if cfg.Uses == "" && cfg.Run == "" {
 		return nil, fmt.Errorf("Step %s has no action, provide one in the 'uses' field", cfg.Name)

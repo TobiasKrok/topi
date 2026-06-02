@@ -65,11 +65,10 @@ func CreateWorkflowPlan(ctx context.Context, cfg sharedworkflow.WorkflowConfig, 
 	}
 
 	wf := &Workflow{
-		Name:               cfg.Name,
-		Ctx:                wfCtx,
-		Jobs:               jobs,
-		Results:            make(map[string]map[string]*StepResult),
-		EnvironmentManager: em,
+		Name:    cfg.Name,
+		Ctx:     wfCtx,
+		Jobs:    jobs,
+		Results: make(map[string]map[string]*StepResult),
 	}
 
 	err = wf.setSystemVariables()
@@ -81,6 +80,7 @@ func CreateWorkflowPlan(ctx context.Context, cfg sharedworkflow.WorkflowConfig, 
 
 }
 
+// TODO: do not use os.Exit
 func (w *Workflow) Execute() {
 	start := time.Now()
 	log.Printf("Starting workflow %s at %s", w.Name, start)
@@ -100,9 +100,9 @@ func (w *Workflow) Execute() {
 		for _, step := range job.Steps {
 			log.Printf("[%s] Running step '%s'", job.Name, step.Name())
 
-			err := w.EnvironmentManager.Load()
+			err := w.Ctx.EnvironmentManager.Load()
 			for k, v := range step {
-				if err := w.EnvironmentManager.Set(k, v); err != nil {
+				if err := w.Ctx.EnvironmentManager.Set(k, v); err != nil {
 					//TODO: error handling
 					// return nil, fmt.Errorf("failed to step '%s' while setting env variable '%s': %w ", s.Name, k, err)
 				}
@@ -147,13 +147,13 @@ func (wf *Workflow) setResult(jobName, stepName string, result *StepResult) {
 
 func (w *Workflow) setSystemVariables() error {
 
-	if err := w.EnvironmentManager.Set("TOPI_WORKSPACE", w.Ctx.Workspace); err != nil {
+	if err := w.Ctx.EnvironmentManager.Set("TOPI_WORKSPACE", w.Ctx.Workspace); err != nil {
 		return fmt.Errorf("failed to set env TOPI_WORKSPACE: %v", err)
 	}
-	if err := w.EnvironmentManager.Set("TOPI_BUILDID", w.Ctx.BuildID); err != nil {
+	if err := w.Ctx.EnvironmentManager.Set("TOPI_BUILDID", w.Ctx.BuildID); err != nil {
 		return fmt.Errorf("failed to set env TOPI_BUILDID: %v", err)
 	}
-	if err := w.EnvironmentManager.Set("TOPI_SYSTEM_DIR", w.Ctx.SystemDir); err != nil {
+	if err := w.Ctx.EnvironmentManager.Set("TOPI_SYSTEM_DIR", w.Ctx.SystemDir); err != nil {
 		return fmt.Errorf("failed to set env TOPI_SYSTEM_DIR: %v", err)
 	}
 	return nil
